@@ -9,7 +9,7 @@
     "check": "tsc --noEmit"
   },
   "author": "",
-  "license": "WTFPL",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "dotenv": "^16.0.0",
     "pino-pretty": "^7.5.1"
