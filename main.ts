@@ -282,6 +282,8 @@ client.on("interactionCreate", async (interaction) => {
 
 // WORKAROUND: Modal
 client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (data: APIModalSubmitInteraction) => {
+	const discordUserId = (data.user?.id ?? data.member?.user.id)!
+
 	if (data.type === InteractionType.ModalSubmit) {
 		const fragment = decodeFragment(data.data.custom_id)
 		if (!fragment) return
@@ -304,7 +306,7 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 
 			const identity = api.as({
 				platform: AccountPlatform.DISCORD,
-				id: (data.user?.id ?? data.member?.user.id)!,
+				id: discordUserId,
 			})
 
 			await createAction(identity, parseInt(id), {
@@ -313,11 +315,33 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 				notes: options.notes,
 			})
 
-			// Delete original message
+			// Fetch and delete message
 
 			const reportsChannel = await client.channels.fetch(config.channels.reports) as TextChannel
+			const logsChannel = await client.channels.fetch(config.channels.logs) as TextChannel
+
 			const message = await reportsChannel.messages.fetch(messageId)
 			await message.delete()
+
+			// Create log
+
+			const [ initialEmbed ] = message.embeds
+			const [ initialMention ] = message.mentions.users.values()
+
+			await logsChannel.send({
+				embeds: [
+					{
+						title: "✅ Report Accepted",
+						description: `<@${discordUserId}> accepted a report from ${initialMention.toString()}`,
+						fields: [
+							{ name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` },
+						],
+						color: 0xd32f2f,
+					},
+				],
+
+				files: [ ...message.attachments.values() ],
+			})
 
 			// Reply
 
