@@ -336,7 +336,7 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 						fields: [
 							{ name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` },
 						],
-						color: 0xd32f2f,
+						color: 0x4caf50,
 					},
 				],
 
