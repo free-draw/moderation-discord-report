@@ -1,11 +1,9 @@
 import "make-promises-safe"
-import { SlashCommandBuilder } from "@discordjs/builders"
-import { APIModalSubmitInteraction, Routes, TextInputStyle, Snowflake } from "discord-api-types/v10"
-import { ActionRow, ButtonComponent, Client, TextChannel, ButtonStyle, Message, InteractionResponseType, ComponentType, InteractionType, GatewayDispatchEvents } from "discord.js"
+import { APIModalSubmitInteraction, Routes, TextInputStyle, Snowflake, APIActionRowComponent, APIMessageActionRowComponent } from "discord-api-types/v10"
+import { Client, TextChannel, ButtonStyle, Message, InteractionResponseType, ComponentType, InteractionType, GatewayDispatchEvents, Events, ActionRowBuilder, ButtonBuilder, SlashCommandBuilder, REST, JSONEncodable, ModalBuilder, TextInputBuilder, ActionRow } from "discord.js"
 import pino from "pino"
 import { resolve } from "path"
 import config from "./config.json"
-import { REST } from "@discordjs/rest"
 import { getIdFromUsername, getPlayerInfo, PlayerInfo } from "noblox.js"
 import { AccountPlatform, ActionType, API, createAction } from "@free-draw/moderation-client"
 
@@ -86,7 +84,7 @@ const command = new SlashCommandBuilder()
 			.setRequired(true)
 	})
 
-client.on("ready", (async () => {
+client.on(Events.ClientReady, (async () => {
 	log.info("Refreshing guild commands")
 
 	await rest.put(
@@ -99,7 +97,7 @@ client.on("ready", (async () => {
 
 /* INTERACTIONS */
 
-client.on("interactionCreate", async (interaction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
 	if (interaction.isChatInputCommand()) {
 		if (interaction.commandName == command.name) {
 			await interaction.deferReply({ ephemeral: true })
@@ -168,27 +166,27 @@ client.on("interactionCreate", async (interaction) => {
 				],
 
 				components: [
-					new ActionRow().setComponents(
-						new ButtonComponent()
+					new ActionRowBuilder().addComponents([
+						new ButtonBuilder()
 							.setCustomId(encodeFragment("accept", id.toString(), ActionType.BAN))
 							.setLabel("Ban")
 							.setStyle(ButtonStyle.Secondary),
 
-						new ButtonComponent()
+						new ButtonBuilder()
 							.setCustomId(encodeFragment("accept", id.toString(), ActionType.DRAWBAN))
 							.setLabel("Draw-ban")
 							.setStyle(ButtonStyle.Secondary),
 
-						new ButtonComponent()
+						new ButtonBuilder()
 							.setCustomId(encodeFragment("accept", id.toString(), ActionType.MUTE))
 							.setLabel("Mute")
 							.setStyle(ButtonStyle.Secondary),
 
-						new ButtonComponent()
+						new ButtonBuilder()
 							.setCustomId(encodeFragment("decline", id.toString()))
 							.setLabel("Decline")
-							.setStyle(ButtonStyle.Danger)
-					),
+							.setStyle(ButtonStyle.Danger),
+					]) as JSONEncodable<APIActionRowComponent<APIMessageActionRowComponent>> // ok
 				],
 			})
 
