@@ -237,6 +237,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 											style: TextInputStyle.Paragraph,
 											custom_id: "notes",
 											label: "Notes",
+											required: false,
 										},
 									],
 								},
