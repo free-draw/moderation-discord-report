@@ -241,18 +241,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 										},
 									],
 								},
-								{
-									type: ComponentType.ActionRow,
-									components: [
-										{
-											type: ComponentType.TextInput,
-											style: TextInputStyle.Short,
-											custom_id: "duration",
-											label: "Duration",
-											required: false,
-										},
-									],
-								},
 							],
 						},
 					},
