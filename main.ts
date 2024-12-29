@@ -53,7 +53,7 @@ async function downloadAttachment(attachment: Attachment): Promise<AttachmentPay
 	const attachmentFile = await axios.get(attachment.url)
 
 	return {
-		attachment: Buffer.from(attachmentFile.data, "binary"),
+		attachment: attachmentFile.data,
 		name: attachment.name,
 		description: attachment.description ?? undefined,
 	}
