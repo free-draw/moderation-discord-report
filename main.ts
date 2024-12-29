@@ -192,7 +192,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 				embeds: [
 					new EmbedBuilder()
 						.setTitle(`${info.displayName} (@${info.username})`)
-						.setDescription(info.blurb)
+						.setDescription(info.blurb.length > 0 ? info.blurb : "*No user description*")
 						.setURL(`https://www.roblox.com/users/${id}/profile`)
 						.setThumbnail(thumbnail)
 						.setColor(config.colors.info as HexColorString)
