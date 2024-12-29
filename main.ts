@@ -50,7 +50,7 @@ function decodeFragment(data: string): {
 }
 
 async function downloadAttachment(attachment: Attachment): Promise<AttachmentPayload> {
-	const attachmentFile = await axios.get(attachment.url)
+	const attachmentFile = await axios.get(attachment.url, { responseType: "arraybuffer" })
 
 	return {
 		attachment: attachmentFile.data,
