@@ -1,11 +1,12 @@
 import "make-promises-safe"
 import { APIModalSubmitInteraction, Routes, TextInputStyle, Snowflake, APIActionRowComponent, APIMessageActionRowComponent } from "discord-api-types/v10"
-import { Client, TextChannel, ButtonStyle, Message, InteractionResponseType, ComponentType, InteractionType, GatewayDispatchEvents, Events, ActionRowBuilder, ButtonBuilder, SlashCommandBuilder, REST, JSONEncodable, ModalBuilder, TextInputBuilder, ActionRow } from "discord.js"
+import { Client, TextChannel, ButtonStyle, Message, InteractionResponseType, ComponentType, InteractionType, GatewayDispatchEvents, Events, ActionRowBuilder, ButtonBuilder, SlashCommandBuilder, REST, JSONEncodable, Attachment, AttachmentPayload } from "discord.js"
 import pino from "pino"
 import { resolve } from "path"
 import config from "./config.json"
 import { getIdFromUsername, getPlayerInfo, PlayerInfo } from "noblox.js"
 import { AccountPlatform, ActionType, API, createAction } from "@free-draw/moderation-client"
+import axios from "axios"
 
 const log = pino()
 
@@ -48,6 +49,16 @@ function decodeFragment(data: string): {
 	return { name, args }
 }
 
+async function downloadAttachment(attachment: Attachment): Promise<AttachmentPayload> {
+	const attachmentFile = await axios.get(attachment.url)
+
+	return {
+		attachment: Buffer.from(attachmentFile.data, "binary"),
+		name: attachment.name,
+		description: attachment.description ?? undefined,
+	}
+}
+
 /* DISCORD */
 
 const rest = new REST({ version: "10" }).setToken(env.TOKEN)
@@ -80,7 +91,7 @@ const command = new SlashCommandBuilder()
 	.addAttachmentOption((option) => {
 		return option
 			.setName("attachment")
-			.setDescription("An image or video showing proof of the offence")
+			.setDescription("An image or video showing proof of the offence (max 25MB)")
 			.setRequired(true)
 	})
 
@@ -107,6 +118,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			const username = interaction.options.getString("username", true)
 			const details = interaction.options.getString("details", true)
 			const attachment = interaction.options.getAttachment("attachment", true)
+
+			if (attachment.size > 25_000_000) {
+				interaction.editReply({
+					content: `❌ **Error**: Attachment must be less than 25MB in size`,
+				})
+
+				return
+			}
 
 			// Fetch: User ID
 
@@ -162,7 +181,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 				],
 
 				files: [
-					attachment,
+					await downloadAttachment(attachment),
 				],
 
 				components: [
@@ -268,7 +287,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 						},
 					],
 
-					files: [ ...initialMessage.attachments.values() ],
+					files: await Promise.all(initialMessage.attachments.map(downloadAttachment)),
 				})
 			} else {
 				await interaction.editReply({
@@ -339,7 +358,7 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 					},
 				],
 
-				files: [ ...message.attachments.values() ],
+				files: await Promise.all(message.attachments.map(downloadAttachment)),
 			})
 
 			// Reply
