@@ -4,7 +4,7 @@ import { Client, TextChannel, ButtonStyle, Message, InteractionResponseType, Com
 import pino from "pino"
 import { resolve } from "path"
 import config from "./config.json"
-import { getIdFromUsername, getPlayerInfo, PlayerInfo } from "noblox.js"
+import { getIdFromUsername, getPlayerInfo, getPlayerThumbnail, PlayerInfo, PlayerThumbnailData } from "noblox.js"
 import { AccountPlatform, ActionType, API, createAction } from "@free-draw/moderation-client"
 import axios from "axios"
 
@@ -144,9 +144,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			// Fetch: Profile
 
 			let info: PlayerInfo
+			let thumbnail: PlayerThumbnailData | null
 
 			try {
 				info = await getPlayerInfo(id)
+
+				const thumbnails = await getPlayerThumbnail([ id ], 180, "png", false, "headshot")
+				if (thumbnails.length !== 0 && thumbnails[0].state === "Completed") {
+					thumbnail = thumbnails[0]
+				} else {
+					thumbnail = null
+				}
 			} catch {
 				interaction.editReply({
 					content: `❌ **Error**: Failed to fetch user profile`,
@@ -171,11 +179,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 					{
 						title: `${info.displayName} (@${info.username})`,
 						url: `https://www.roblox.com/users/${id}/profile`,
+						thumbnail: thumbnail ? thumbnail.imageUrl,
 						description: info.blurb,
+						color: 0xd32f2f,
 						fields: [
-							{ name: "Friends", value: info.friendCount ? info.friendCount.toLocaleString("en-US") : "Error", inline: true },
-							{ name: "Following", value: info.followingCount ? info.followingCount.toLocaleString("en-US") : "Error", inline: true },
-							{ name: "Followers", value: info.followerCount ? info.followerCount.toLocaleString("en-US") : "Error", inline: true },
+							{ name: "Joined", value: `<t:${info.joinDate.getTime()}:f>`, inline: true },
 						],
 					},
 				],

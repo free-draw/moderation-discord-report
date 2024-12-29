@@ -21,7 +21,7 @@
     "discord-api-types": "^0.37.86",
     "discord.js": "^14.15.2",
     "make-promises-safe": "^5.1.0",
-    "noblox.js": "^4.15.1",
+    "noblox.js": "^6.0.2",
     "pino": "^7.8.0",
     "ts-node": "^10.9.2",
     "typescript": "^4.5.5"
