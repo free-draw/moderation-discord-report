@@ -179,7 +179,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 					{
 						title: `${info.displayName} (@${info.username})`,
 						url: `https://www.roblox.com/users/${id}/profile`,
-						thumbnail: thumbnail ? thumbnail.imageUrl : undefined,
+						thumbnail: thumbnail ? { url: thumbnail.imageUrl as string } : undefined,
 						description: info.blurb,
 						color: 0xd32f2f,
 						fields: [
