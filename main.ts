@@ -59,7 +59,7 @@ async function downloadAttachment(attachment: Attachment): Promise<AttachmentPay
 	}
 }
 
-async function getThumbnail(id: number, size: number, type: "body" | "bust" | "headshot"): string | null {
+async function getThumbnail(id: number, size: number, type: "body" | "bust" | "headshot"): Promise<string | null> {
 	const response = await getPlayerThumbnail([ id ], size, "png", false, type)
 
 	if (response.length > 0) {
@@ -146,7 +146,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 			try {
 				id = await getIdFromUsername(username)
-			} catch {
+			} catch(error) {
+				log.error(error)
+
 				interaction.editReply({
 					content: `❌ **Error**: Username "${username}" is invalid`,
 				})
@@ -164,7 +166,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 					getPlayerInfo(id),
 					getThumbnail(id, 180, "headshot"),
 				])
-			} catch {
+			} catch(error) {
+				log.error(error)
+
 				interaction.editReply({
 					content: `❌ **Error**: Failed to fetch user profile`,
 				})
