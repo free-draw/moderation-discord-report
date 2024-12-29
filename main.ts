@@ -59,6 +59,19 @@ async function downloadAttachment(attachment: Attachment): Promise<AttachmentPay
 	}
 }
 
+async function getThumbnail(id: number, size: number, type: "body" | "bust" | "headshot"): string | null {
+	const response = await getPlayerThumbnail([ id ], size, "png", false, type)
+
+	if (response.length > 0) {
+		const thumbnail = response[0]
+		if (thumbnail.imageUrl && thumbnail.state === "Completed") {
+			return thumbnail.imageUrl
+		}
+	}
+
+	return null
+}
+
 /* DISCORD */
 
 const rest = new REST({ version: "10" }).setToken(env.TOKEN)
@@ -144,17 +157,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			// Fetch: Profile
 
 			let info: PlayerInfo
-			let thumbnail: PlayerThumbnailData | null
+			let thumbnail: string | null
 
 			try {
-				info = await getPlayerInfo(id)
-
-				const thumbnails = await getPlayerThumbnail([ id ], 180, "png", false, "headshot")
-				if (thumbnails.length !== 0 && thumbnails[0].state === "Completed") {
-					thumbnail = thumbnails[0]
-				} else {
-					thumbnail = null
-				}
+				[ info, thumbnail ] = await Promise.all([
+					getPlayerInfo(id),
+					getThumbnail(id, 180, "headshot"),
+				])
 			} catch {
 				interaction.editReply({
 					content: `❌ **Error**: Failed to fetch user profile`,
