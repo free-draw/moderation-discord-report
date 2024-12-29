@@ -179,8 +179,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 			await channel.send({
 				content: [
-					`from ${interaction.user.toString()}`,
 					`> ${details}`,
+					"",
+					`from ${interaction.user.toString()}`,
 					`**\n**`, // spacing hack
 				].join("\n"),
 
