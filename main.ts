@@ -194,7 +194,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 						.setTitle(`${info.displayName} (@${info.username})`)
 						.setDescription(info.blurb)
 						.setURL(`https://www.roblox.com/users/${id}/profile`)
-						.setThumbnail(thumbnail ? thumbnail.imageUrl as string : null)
+						.setThumbnail(thumbnail)
 						.setColor(config.colors.info as HexColorString)
 						.addFields([ { name: "Joined", value: `<t:${Math.floor(info.joinDate.getTime() / 1000)}:f>` } ]),
 				],
