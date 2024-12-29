@@ -1,4 +1,9 @@
 {
+	"colors": {
+		"info": "#e089e7",
+		"success": "#4caf50",
+		"error": "#d32f2f"
+	},
 	"guild": "361285686495543296",
 	"channels": {
 		"reports": "804941122618785822",

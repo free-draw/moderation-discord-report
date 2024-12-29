@@ -1,6 +1,6 @@
 import "make-promises-safe"
 import { APIModalSubmitInteraction, Routes, TextInputStyle, Snowflake, APIActionRowComponent, APIMessageActionRowComponent } from "discord-api-types/v10"
-import { Client, TextChannel, ButtonStyle, Message, InteractionResponseType, ComponentType, InteractionType, GatewayDispatchEvents, Events, ActionRowBuilder, ButtonBuilder, SlashCommandBuilder, REST, JSONEncodable, Attachment, AttachmentPayload } from "discord.js"
+import { Client, TextChannel, ButtonStyle, Message, InteractionResponseType, ComponentType, InteractionType, GatewayDispatchEvents, Events, ActionRowBuilder, ButtonBuilder, SlashCommandBuilder, REST, JSONEncodable, Attachment, AttachmentPayload, EmbedBuilder, HexColorString } from "discord.js"
 import pino from "pino"
 import { resolve } from "path"
 import config from "./config.json"
@@ -176,16 +176,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 				].join("\n"),
 
 				embeds: [
-					{
-						title: `${info.displayName} (@${info.username})`,
-						url: `https://www.roblox.com/users/${id}/profile`,
-						thumbnail: thumbnail ? { url: thumbnail.imageUrl as string } : undefined,
-						description: info.blurb,
-						color: 0xd32f2f,
-						fields: [
-							{ name: "Joined", value: `<t:${info.joinDate.getTime()}:f>`, inline: true },
-						],
-					},
+					new EmbedBuilder()
+						.setTitle(`${info.displayName} (@${info.username})`)
+						.setDescription(info.blurb)
+						.setURL(`https://www.roblox.com/users/${id}/profile`)
+						.setThumbnail(thumbnail ? thumbnail.imageUrl as string : null)
+						.setColor(config.colors.info as HexColorString)
+						.addFields([ { name: "Joined", value: `<t:${Math.floor(info.joinDate.getTime() / 1000)}:f>` } ]),
 				],
 
 				files: [
@@ -285,14 +282,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 				await logsChannel.send({
 					embeds: [
-						{
-							title: "❌ Report Declined",
-							description: `${interaction.user.toString()} declined a report from ${initialMention.toString()}`,
-							fields: [
-								{ name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` },
-							],
-							color: 0xd32f2f,
-						},
+						new EmbedBuilder()
+							.setTitle("❌ Report Declined")
+							.setDescription(`${interaction.user.toString()} declined a report from ${initialMention.toString()}`)
+							.setColor(config.colors.error as HexColorString)
+							.addFields({ name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` })
 					],
 
 					files: await Promise.all(initialMessage.attachments.map(downloadAttachment)),
@@ -356,14 +350,11 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 
 			await logsChannel.send({
 				embeds: [
-					{
-						title: "✅ Report Accepted",
-						description: `<@${discordUserId}> accepted a report from ${initialMention.toString()}`,
-						fields: [
-							{ name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` },
-						],
-						color: 0x4caf50,
-					},
+					new EmbedBuilder()
+						.setTitle("✅ Report Accepted")
+						.setDescription(`<@${discordUserId}> accepted a report from ${initialMention.toString()}`)
+						.setColor(config.colors.success as HexColorString)
+						.addFields([ { name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` } ])
 				],
 
 				files: await Promise.all(message.attachments.map(downloadAttachment)),
