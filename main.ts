@@ -4,7 +4,7 @@ import { Client, TextChannel, ButtonStyle, Message, InteractionResponseType, Com
 import pino from "pino"
 import { resolve } from "path"
 import config from "./config.json"
-import { getIdFromUsername, getPlayerInfo, getPlayerThumbnail, PlayerInfo, PlayerThumbnailData } from "noblox.js"
+import { BodySizes, BustSizes, getIdFromUsername, getPlayerInfo, getPlayerThumbnail, HeadshotSizes, PlayerInfo, PlayerThumbnailData } from "noblox.js"
 import { AccountPlatform, ActionType, API, createAction } from "@free-draw/moderation-client"
 import axios from "axios"
 
@@ -59,7 +59,7 @@ async function downloadAttachment(attachment: Attachment): Promise<AttachmentPay
 	}
 }
 
-async function getThumbnail(id: number, size: number, type: "body" | "bust" | "headshot"): Promise<string | null> {
+async function getThumbnail(id: number, size: BodySizes | BustSizes | HeadshotSizes, type: "body" | "bust" | "headshot"): Promise<string | null> {
 	const response = await getPlayerThumbnail([ id ], size, "png", false, type)
 
 	if (response.length > 0) {
