@@ -354,6 +354,7 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 			const logsChannel = await client.channels.fetch(config.channels.logs) as TextChannel
 
 			const message = await reportsChannel.messages.fetch(messageId)
+			const attachments = await Promise.all(message.attachments.map(downloadAttachment))
 			await message.delete()
 
 			// Create log
@@ -370,7 +371,7 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 						.addFields([ { name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` } ])
 				],
 
-				files: await Promise.all(message.attachments.map(downloadAttachment)),
+				files: attachments,
 			})
 
 			// Reply
