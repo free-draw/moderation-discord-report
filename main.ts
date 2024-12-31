@@ -287,8 +287,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			const message = await reportsChannel.messages.fetch(interaction.message.id)
 
 			if (message) {
-				await message.delete()
-
 				const initialMessage = interaction.message as Message
 				const [ initialEmbed ] = initialMessage.embeds
 				const [ initialMention ] = initialMessage.mentions.users.values()
@@ -302,8 +300,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 							.addFields({ name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` })
 					],
 
-					files: await Promise.all(initialMessage.attachments.map(downloadAttachment)),
+					files: [ ...initialMessage.attachments.values() ],
 				})
+
+				await message.delete()
 			} else {
 				await interaction.editReply({
 					content: `❌ **Error**: Failed to find message with ID ${interaction.message.id}`
@@ -354,8 +354,6 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 			const logsChannel = await client.channels.fetch(config.channels.logs) as TextChannel
 
 			const message = await reportsChannel.messages.fetch(messageId)
-			const attachments = await Promise.all(message.attachments.map(downloadAttachment))
-			await message.delete()
 
 			// Create log
 
@@ -371,8 +369,12 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 						.addFields([ { name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` } ])
 				],
 
-				files: attachments,
+				files: [ ...message.attachments.values() ],
 			})
+
+			// Delete message
+
+			await message.delete()
 
 			// Reply
 
