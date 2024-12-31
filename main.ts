@@ -287,20 +287,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			const message = await reportsChannel.messages.fetch(interaction.message.id)
 
 			if (message) {
-				const initialMessage = interaction.message as Message
-				const [ initialEmbed ] = initialMessage.embeds
-				const [ initialMention ] = initialMessage.mentions.users.values()
+				const [ embed ] = message.embeds
+				const [ mention ] = message.mentions.users.values()
 
 				await logsChannel.send({
 					embeds: [
 						new EmbedBuilder()
 							.setTitle("❌ Report Declined")
-							.setDescription(`${interaction.user.toString()} declined a report from ${initialMention.toString()}`)
+							.setDescription(`${interaction.user.toString()} declined a report from ${mention.toString()}`)
 							.setColor(config.colors.error as HexColorString)
-							.addFields({ name: "User", value: `[${initialEmbed.title}](${initialEmbed.url})` })
+							.addFields({ name: "User", value: `[${embed.title}](${embed.url})` })
 					],
 
-					files: [ ...initialMessage.attachments.values() ],
+					files: [ ...message.attachments.values() ],
 				})
 
 				await message.delete()
