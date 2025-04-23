@@ -72,6 +72,37 @@ async function getThumbnail(id: number, size: BodySizes | BustSizes | HeadshotSi
 	return null
 }
 
+const relativeTimeRegex = /(\d+)\s*(\w+)/g
+const relativeTimeUnits = {
+	y: 31104000, year: 31104000, years: 31104000,
+	mo: 2592000, month: 2592000, months: 2592000,
+	w: 604800, week: 604800, weeks: 604800,
+	d: 86400, day: 86400, days: 86400,
+	h: 3600, hour: 3600, hours: 3600,
+	m: 60, min: 60, minute: 60, minutes: 60,
+	s: 1, sec: 1, second: 1, seconds: 1,
+} as { [unit: string]: number | undefined }
+
+function parseRelativeTime(input: string): number | null {
+	if (!input.match(relativeTimeRegex)) {
+		return null
+	}
+
+	let result = 0
+
+	for (const [ _, time, unit ] of input.toLowerCase().matchAll(relativeTimeRegex)) {
+		const unitMultiplier = relativeTimeUnits[unit]
+
+		if (unitMultiplier) {
+			result += parseInt(time) * unitMultiplier
+		} else {
+			return null
+		}
+	}
+
+	return result
+}
+
 /* DISCORD */
 
 const rest = new REST({ version: "10" }).setToken(env.TOKEN)
@@ -278,6 +309,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
 										},
 									],
 								},
+								{
+									type: ComponentType.ActionRow,
+									components: [
+										{
+											type: ComponentType.TextInput,
+											style: TextInputStyle.Short,
+											custom_id: "duration",
+											label: "Duration",
+											required: false,
+										},
+									],
+								},
 							],
 						},
 					},
@@ -345,6 +388,7 @@ client.ws.on("INTERACTION_CREATE" as unknown as GatewayDispatchEvents, async (da
 				type: type,
 				reason: options.reason,
 				notes: options.notes,
+				duration: parseRelativeTime(options.duration) ?? undefined,
 			})
 
 			// Fetch and delete message
