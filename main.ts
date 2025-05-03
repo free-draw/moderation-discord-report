@@ -317,7 +317,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 											style: TextInputStyle.Short,
 											custom_id: "duration",
 											label: "Duration",
-											required: false,
+											required: true,
 										},
 									],
 								},
